@@ -1,98 +1,55 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { ScrollView, StatusBar, View, StyleSheet } from 'react-native';
+import HeroCard from '@/components/home/HeroCard';
+import AIInsightsCard from '@/components/home/AIInsightsCard';
+import RenewalsList, { Subscription } from '@/components/home/RenewalsList';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { theme } from '@/constants/theme';
+import { TransactionRow } from '@/components/home/TransactionRow';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+const mockSubscriptions: Subscription[] = [
+  { id: '1', name: 'Netflix', logo: 'N', amount: 129, renewalDate: '2026-04-27', daysUntilRenewal: 3 },
+  { id: '2', name: 'Spotify', logo: 'S', amount: 80, renewalDate: '2026-05-01', daysUntilRenewal: 7 },
+  { id: '3', name: 'YouTube', logo: 'Y', amount: 85, renewalDate: '2026-05-05', daysUntilRenewal: 11 },
+];
 
 export default function HomeScreen() {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
-
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <SafeAreaView edges={['top']} style={styles.container}>
+      <StatusBar barStyle="light-content" />
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+        <HeroCard />
+        <View style={styles.section}>
+          <AIInsightsCard
+            insight="Food delivery up 3x vs last week — mostly Thursday nights."
+            trendMultiplier={3}
+            amount={340}
+            category="Food"
+          />
+        </View>
+        <View style={styles.section}>
+          <RenewalsList subscriptions={mockSubscriptions} />
+        </View>
+        <View style={styles.section}>
+          <TransactionRow icon={''} iconBg={''} merchant={''} category={''} amount={0} />
+        </View>
+        <View style={{ paddingBottom: 100 }} />
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    backgroundColor: theme.colors.background,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  scroll: {
+    backgroundColor: theme.colors.background,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  content: {
+    paddingHorizontal: 16,
+    paddingTop: 8,
+  },
+  section: {
+    marginTop: 20,
   },
 });
