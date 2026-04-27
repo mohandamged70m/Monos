@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   row: {
-    backgroundColor: theme.colors.surfaceElevated,
+    backgroundColor: '#3535a131',
     borderRadius: 16,
     padding: 12,
     flexDirection: 'row',

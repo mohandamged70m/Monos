@@ -1,7 +1,5 @@
 import { components } from "@/constants/theme";
 import { Tabs } from "expo-router";
-import { Image, View } from "react-native";
-import { clsx } from "clsx";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { tabs } from "@/constants/data";
 import { colors } from "@/constants/colors";
@@ -9,23 +7,14 @@ import { colors } from "@/constants/colors";
 const tabBar = components.tabBar;
 
 
-const TabIcon = ({ focused, icon }: { focused: boolean; icon: any }) => {
-  return (
-    <View className="tabs-icon">
-      <View className={clsx('tabs-pill', focused && 'tabs-active')}>
-        <Image source={icon} resizeMode="contain" className="tabs-glyph" />
-      </View>
-    </View>
-  )
-}
-
 const TabLayout = () => {
   const insets = useSafeAreaInsets();
   return (
     <Tabs 
       screenOptions={{ 
         headerShown : false,
-        tabBarShowLabel : false,
+        tabBarActiveTintColor: colors.text1,
+        tabBarInactiveTintColor: colors.text3,
         tabBarStyle : {
           position : 'absolute',
           bottom: Math.max(insets.bottom, tabBar.horizontalInset),
@@ -36,14 +25,6 @@ const TabLayout = () => {
           borderTopWidth : 0,
           elevation : 0,
         },
-        tabBarItemStyle : {
-          paddingVertical : tabBar.height / 2 - tabBar.iconFrame / 1.6,
-        },
-        tabBarIconStyle : {
-          width : tabBar.iconFrame,
-          height : tabBar.iconFrame,
-          alignItems : 'center',
-        }
       }}
     >
       {tabs.map((tab) => (
@@ -52,9 +33,6 @@ const TabLayout = () => {
           name={tab.name} 
           options={{ 
             title : tab.title,
-            tabBarIcon : ({ focused }) => (
-              <TabIcon focused={focused} icon={tab.icon} />
-            )
           }} />
       ))}
     </Tabs>

@@ -1,12 +1,12 @@
 import { View, Text } from 'react-native'
 import React from 'react'
 
-const goals = () => {
+const insights = () => {
   return (
     <View>
-      <Text>goals</Text>
+      <Text>insights</Text>
     </View>
   )
 }
 
-export default goals
+export default insights

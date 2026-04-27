@@ -109,7 +109,7 @@ export default function HeroCard({ data }: HeroCardProps) {
       >
         <Text style={styles.balanceLabel}>TOTAL BALANCE</Text>
         <Text style={styles.balanceAmount}>{formatCurrency(balance)}</Text>
-        <Text style={[styles.balanceChange, { color: isPositive ? theme.colors.success : theme.colors.destructive }]}>
+        <Text style={[styles.balanceChange, { color: theme.colors.textMuted }]}>
           {isPositive ? '↑' : '↓'} {balanceChangeFormatted} from last month
         </Text>
       </AnimatedTouchable>
@@ -135,8 +135,6 @@ const styles = StyleSheet.create({
     padding: 20,
     marginHorizontal: -16,
     gap: 18,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
   },
 
   topRow: {
@@ -193,8 +191,6 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     alignItems: 'center',
     gap: 3,
-    borderWidth: 1,
-    borderColor: theme.colors.borderSubtle,
   },
   statValue: {
     fontSize: 15,
