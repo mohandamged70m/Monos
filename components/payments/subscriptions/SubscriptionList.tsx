@@ -1,14 +1,38 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Alert } from 'react-native';
 import { theme } from '@/constants/theme';
 import { SubscriptionItem } from '@/constants/billsData';
 import SubscriptionCard from './SubscriptionCard';
+import { useBills } from '@/context/BillsContext';
 
 interface SubscriptionListProps {
   subscriptions: SubscriptionItem[];
 }
 
 export default function SubscriptionList({ subscriptions }: SubscriptionListProps) {
+  const { deleteSubscription } = useBills();
+
+  const handleDelete = (id: string) => {
+    Alert.alert(
+      'Delete Subscription',
+      'Are you sure you want to delete this subscription?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteSubscription(id);
+            } catch (error) {
+              Alert.alert('Error', 'Failed to delete subscription. Please try again.');
+            }
+          },
+        },
+      ]
+    );
+  };
+
   if (subscriptions.length === 0) {
     return null;
   }
@@ -18,7 +42,7 @@ export default function SubscriptionList({ subscriptions }: SubscriptionListProp
       <Text style={styles.sectionTitle}>YOUR SUBSCRIPTIONS</Text>
       <View style={styles.list}>
         {subscriptions.map((item) => (
-          <SubscriptionCard key={item.id} item={item} />
+          <SubscriptionCard key={item.id} item={item} onDelete={handleDelete} />
         ))}
       </View>
     </View>

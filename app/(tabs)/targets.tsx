@@ -1,172 +1,304 @@
-'use client';
-
-import { useState } from 'react';
-import { ScrollView, StatusBar, View, StyleSheet, Text } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  StatusBar,
+  Modal,
+  ActivityIndicator,
+} from 'react-native';
+import React, { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Plus, HelpCircle } from 'lucide-react-native';
 import { theme } from '@/constants/theme';
+import TargetsSummaryCard from '@/components/targets/TargetsSummaryCard';
+import TargetsEmptyState from '@/components/targets/TargetsEmptyState';
 import GoalCard from '@/components/targets/goals/GoalCard';
-import GoalsHero from '@/components/targets/goals/GoalsHero';
 import BudgetCard from '@/components/targets/budgets/BudgetCard';
-import BudgetHero from '@/components/targets/budgets/BudgetHero';
+import GoalForm from '@/components/targets/goals/GoalForm';
+import BudgetForm from '@/components/targets/budgets/BudgetForm';
+import { useTargets } from '@/context/TargetsContext';
+import { TargetsTab } from '@/context/TargetsContext';
 
-const mockGoals = [
-  {
-    id: '1',
-    name: 'Emergency Fund',
-    targetAmount: 50000,
-    savedAmount: 32500,
-    monthlyContribution: 2500,
-    color: '#8B5CF6',
-    icon: '🛡️',
-  },
-  {
-    id: '2',
-    name: 'New MacBook Pro',
-    targetAmount: 80000,
-    savedAmount: 45000,
-    monthlyContribution: 5000,
-    color: '#14B8A6',
-    icon: '💻',
-  },
-  {
-    id: '3',
-    name: 'Trip to Japan',
-    targetAmount: 35000,
-    savedAmount: 12000,
-    monthlyContribution: 2000,
-    color: '#F59E0B',
-    icon: '✈️',
-  },
-  {
-    id: '4',
-    name: 'Home Down Payment',
-    targetAmount: 150000,
-    savedAmount: 68000,
-    monthlyContribution: 6000,
-    color: '#EC4899',
-    icon: '🏠',
-  },
-];
+export default function TargetsPage() {
+  const {
+    goals,
+    budgets,
+    goalsSummary,
+    budgetsSummary,
+    activeTab,
+    setActiveTab,
+    loading,
+    refetch,
+  } = useTargets();
 
-const mockBudgets = [
-  {
-    id: '1',
-    category: 'Food & Dining',
-    limit: 3000,
-    spent: 2400,
-    color: '#F59E0B',
-    icon: '🍔',
-  },
-  {
-    id: '2',
-    category: 'Transport',
-    limit: 1500,
-    spent: 1200,
-    color: '#14B8A6',
-    icon: '🚗',
-  },
-  {
-    id: '3',
-    category: 'Entertainment',
-    limit: 2000,
-    spent: 2100,
-    color: '#EC4899',
-    icon: '🎬',
-  },
-  {
-    id: '4',
-    category: 'Shopping',
-    limit: 2000,
-    spent: 800,
-    color: '#8B5CF6',
-    icon: '🛍️',
-  },
-];
+  const [showAddGoal, setShowAddGoal] = useState(false);
+  const [showAddBudget, setShowAddBudget] = useState(false);
+  const insets = useSafeAreaInsets();
 
-const totalSaved = mockGoals.reduce((sum, g) => sum + g.savedAmount, 0);
-const totalTarget = mockGoals.reduce((sum, g) => sum + g.targetAmount, 0);
-const monthlyTotal = mockGoals.reduce((sum, g) => sum + g.monthlyContribution, 0);
+  const isGoal = activeTab === 'goals';
+  const accentColor = isGoal ? theme.colors.teal : theme.colors.accent;
 
-const totalBudget = mockBudgets.reduce((sum, b) => sum + b.limit, 0);
-const totalSpent = mockBudgets.reduce((sum, b) => sum + b.spent, 0);
-const remaining = totalBudget - totalSpent;
+  if (loading) {
+    return (
+      <View style={[styles.container, { paddingBottom: insets.bottom }]}>
+        <StatusBar barStyle="light-content" />
+        <SafeAreaView edges={['top']} style={styles.safeArea}>
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={theme.colors.accent} />
+          </View>
+        </SafeAreaView>
+      </View>
+    );
+  }
 
-export default function TargetsScreen() {
-  const [activeView, setActiveView] = useState<'goals' | 'budget'>('goals');
+  const handleAddPress = () => {
+    if (isGoal) {
+      setShowAddGoal(true);
+    } else {
+      setShowAddBudget(true);
+    }
+  };
+
+  const handleTabPress = (tab: TargetsTab) => {
+    setActiveTab(tab);
+  };
+
+  const handleGoalSave = async () => {
+    setShowAddGoal(false);
+    await refetch();
+  };
+
+  const handleBudgetSave = async () => {
+    setShowAddBudget(false);
+    await refetch();
+  };
 
   return (
     <SafeAreaView edges={['top']} style={styles.container}>
       <StatusBar barStyle="light-content" />
+
+      <View style={styles.header}>
+        <View style={styles.headerLeft}>
+          <Text style={styles.title}>Targets</Text>
+        </View>
+        <View style={styles.headerRight}>
+          <TouchableOpacity style={styles.iconButton} activeOpacity={0.7}>
+            <HelpCircle color={theme.colors.textSecondary} size={22} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.fabButton, { backgroundColor: accentColor }]}
+            activeOpacity={0.85}
+            onPress={handleAddPress}
+          >
+            <Plus color="white" size={24} />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <View style={styles.tabContainer}>
+        <TouchableOpacity
+          style={[
+            styles.tab,
+            isGoal && styles.tabActive,
+            isGoal && { borderColor: theme.colors.teal },
+          ]}
+          onPress={() => handleTabPress('goals')}
+          activeOpacity={0.7}
+        >
+          <Text
+            style={[
+              styles.tabText,
+              isGoal && { color: theme.colors.teal },
+            ]}
+          >
+            Goals
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            styles.tab,
+            !isGoal && styles.tabActive,
+            !isGoal && { borderColor: theme.colors.accent },
+          ]}
+          onPress={() => handleTabPress('budget')}
+          activeOpacity={0.7}
+        >
+          <Text
+            style={[
+              styles.tabText,
+              !isGoal && { color: theme.colors.accent },
+            ]}
+          >
+            Budget
+          </Text>
+        </TouchableOpacity>
+      </View>
+
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
       >
-        <GoalsHero
-          data={{
-            totalSaved,
-            totalTarget,
-            goalsCount: mockGoals.length,
-            monthlyTotal,
-          }}
-          budgetData={{
-            totalBudget,
-            totalSpent,
-            categoriesCount: mockBudgets.length,
-            remaining,
-          }}
-          activeView={activeView}
-          onViewChange={setActiveView}
+        <TargetsSummaryCard
+          type={activeTab}
+          goalsData={goalsSummary}
+          budgetData={budgetsSummary}
         />
 
-        {activeView === 'goals' ? (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>YOUR GOALS</Text>
-            {mockGoals.map((goal) => (
+        {isGoal ? (
+          goals.length > 0 ? (
+            goals.map((goal) => (
               <View key={goal.id} style={styles.cardWrapper}>
                 <GoalCard goal={goal} />
               </View>
-            ))}
-          </View>
+            ))
+          ) : (
+            <TargetsEmptyState type="goals" onAddPress={handleAddPress} />
+          )
+        ) : budgets.length > 0 ? (
+          budgets.map((budget) => (
+            <View key={budget.id} style={styles.cardWrapper}>
+              <BudgetCard budget={budget} />
+            </View>
+          ))
         ) : (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>YOUR BUDGETS</Text>
-            {mockBudgets.map((budget) => (
-              <View key={budget.id} style={styles.cardWrapper}>
-                <BudgetCard budget={budget} />
-              </View>
-            ))}
-          </View>
+          <TargetsEmptyState type="budget" onAddPress={handleAddPress} />
         )}
-        
-        <View style={{ paddingBottom: 120 }} />
+
+        <View style={styles.bottomPadding} />
       </ScrollView>
+
+      <Modal
+        visible={showAddGoal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowAddGoal(false)}
+      >
+        <SafeAreaView edges={['top']} style={styles.modalContainer}>
+          <GoalForm
+            onSave={handleGoalSave}
+            onCancel={() => setShowAddGoal(false)}
+          />
+        </SafeAreaView>
+      </Modal>
+
+      <Modal
+        visible={showAddBudget}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowAddBudget(false)}
+      >
+        <SafeAreaView edges={['top']} style={styles.modalContainer}>
+          <BudgetForm
+            onSave={handleBudgetSave}
+            onCancel={() => setShowAddBudget(false)}
+          />
+        </SafeAreaView>
+      </Modal>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     backgroundColor: theme.colors.background,
   },
+  safeArea: {
+    flex: 1,
+    backgroundColor: theme.colors.background,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  title: {
+    color: theme.colors.textPrimary,
+    fontSize: 28,
+    fontWeight: '800',
+    letterSpacing: -0.5,
+  },
+  iconButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: theme.colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  fabButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    marginHorizontal: 16,
+    marginBottom: 16,
+    backgroundColor: theme.colors.surface,
+    borderRadius: 12,
+    padding: 4,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: 'center',
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  tabActive: {
+    backgroundColor: theme.colors.surfaceElevated,
+  },
+  tabText: {
+    color: theme.colors.textMuted,
+    fontSize: 14,
+    fontWeight: '600',
+  },
   scroll: {
+    flex: 1,
     backgroundColor: theme.colors.background,
   },
   content: {
     paddingHorizontal: 16,
     paddingTop: 8,
   },
-  section: {
-    marginTop: 24,
-  },
-  sectionTitle: {
-    color: theme.colors.textMuted,
-    fontSize: 11,
-    fontWeight: '600',
-    letterSpacing: 1.5,
-    paddingHorizontal: 4,
-    marginBottom: 16,
-  },
-  cardWrapper: {
-    marginBottom: 12,
-  },
+   cardWrapper: {
+     marginBottom: 12,
+   },
+   bottomPadding: {
+     height: 100,
+   },
+   modalContainer: {
+     flex: 1,
+     backgroundColor: theme.colors.background,
+   },
 });

@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { theme } from '@/constants/theme';
 import { InstallmentItem } from '@/constants/billsData';
 
@@ -32,12 +32,24 @@ function getStatusDotColor(status: InstallmentItem['status']): string {
 }
 
 export default function InstallmentCard({ item, onPress }: InstallmentCardProps) {
+  const [expanded, setExpanded] = useState(false);
+  const animation = useRef(new Animated.Value(0)).current;
   const progress = (item.paidMonths / item.totalMonths) * 100;
+
+  const toggleExpand = () => {
+    const toValue = expanded ? 0 : 1;
+    Animated.timing(animation, {
+      toValue,
+      duration: 250,
+      useNativeDriver: false,
+    }).start();
+    setExpanded(!expanded);
+  };
 
   return (
     <TouchableOpacity
       style={styles.container}
-      onPress={onPress}
+      onPress={toggleExpand}
       activeOpacity={0.7}
     >
       <View style={[styles.logo, { backgroundColor: item.logoColor }]}>
@@ -75,7 +87,43 @@ export default function InstallmentCard({ item, onPress }: InstallmentCardProps)
         <Text style={styles.remaining}>
           {formatCurrency(item.remainingAmount)} left
         </Text>
+        <Text style={styles.expandHint}>{expanded ? 'Less' : 'Details'}</Text>
       </View>
+
+      <Animated.View style={[
+        styles.expandedSection,
+        {
+          maxHeight: animation.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0, 300],
+          }),
+          opacity: animation,
+        }
+      ]}>
+        <View style={styles.divider} />
+        <View style={styles.detailRow}>
+          <Text style={styles.detailLabel}>Status</Text>
+          <Text style={[styles.detailValue, { color: getStatusDotColor(item.status) }]}>
+            {item.status}
+          </Text>
+        </View>
+        <View style={styles.detailRow}>
+          <Text style={styles.detailLabel}>Renewal Date</Text>
+          <Text style={styles.detailValue}>{item.renewalDate}</Text>
+        </View>
+        <View style={styles.detailRow}>
+          <Text style={styles.detailLabel}>Days Until Payment</Text>
+          <Text style={styles.detailValue}>{getDaysLabel(item.daysUntilPayment)}</Text>
+        </View>
+        <View style={styles.detailRow}>
+          <Text style={styles.detailLabel}>Progress</Text>
+          <Text style={styles.detailValue}>{item.paidMonths} of {item.totalMonths} months</Text>
+        </View>
+        <View style={styles.detailRow}>
+          <Text style={styles.detailLabel}>Remaining Amount</Text>
+          <Text style={styles.detailValue}>{formatCurrency(item.remainingAmount)}</Text>
+        </View>
+      </Animated.View>
     </TouchableOpacity>
   );
 }
@@ -90,6 +138,7 @@ const styles = StyleSheet.create({
     gap: 12,
     borderWidth: 1,
     borderColor: theme.colors.borderSubtle,
+    flexWrap: 'wrap',
   },
   logo: {
     width: 44,
@@ -162,5 +211,36 @@ const styles = StyleSheet.create({
     color: theme.colors.textMuted,
     fontSize: 10,
     marginTop: 4,
+  },
+  expandHint: {
+    color: theme.colors.accent,
+    fontSize: 10,
+    fontWeight: '500',
+    marginTop: 2,
+  },
+  expandedSection: {
+    width: '100%',
+    overflow: 'hidden',
+    marginTop: 10,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: theme.colors.borderSubtle,
+    marginBottom: 10,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 6,
+  },
+  detailLabel: {
+    color: theme.colors.textMuted,
+    fontSize: 12,
+  },
+  detailValue: {
+    color: theme.colors.textPrimary,
+    fontSize: 12,
+    fontWeight: '500',
   },
 });

@@ -25,6 +25,11 @@ export default function TransactionsList({ transactions }: TransactionsListProps
             merchant={tx.merchant}
             category={tx.category}
             amount={tx.amount}
+            date={tx.date}
+            type={tx.type}
+            account={tx.account}
+            description={tx.description}
+            note={tx.note}
           />
         ))}
       </View>

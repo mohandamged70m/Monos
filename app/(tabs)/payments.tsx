@@ -1,12 +1,13 @@
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  StatusBar,
-} from 'react-native';
-import React from 'react';
+   View,
+   Text,
+   StyleSheet,
+   ScrollView,
+   TouchableOpacity,
+   StatusBar,
+   Modal,
+ } from 'react-native';
+import React, { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Plus, HelpCircle, Calendar } from 'lucide-react-native';
 import { theme } from '@/constants/theme';
@@ -14,26 +15,35 @@ import BillsSummaryCard from '@/components/payments/BillsSummaryCard';
 import EmptyState from '@/components/payments/EmptyState';
 import SubscriptionList from '@/components/payments/subscriptions/SubscriptionList';
 import InstallmentList from '@/components/payments/installments/InstallmentList';
+import SubscriptionForm from '@/components/payments/subscriptions/SubscriptionForm';
+import InstallmentForm from '@/components/payments/installments/InstallmentForm';
 import { useBills } from '@/context/BillsContext';
 
 type BillsTab = 'subscriptions' | 'installments';
 
 export default function BillsPage() {
-  const {
-    subscriptions,
-    installments,
-    subscriptionSummary,
-    installmentSummary,
-    activeTab,
-    setActiveTab,
-  } = useBills();
+   const {
+     subscriptions,
+     installments,
+     subscriptionSummary,
+     installmentSummary,
+     activeTab,
+     setActiveTab,
+   } = useBills();
 
-  const isSubscription = activeTab === 'subscriptions';
-  const accentColor = isSubscription ? theme.colors.teal : theme.colors.accent;
+   const [showAddSubscription, setShowAddSubscription] = useState(false);
+   const [showAddInstallment, setShowAddInstallment] = useState(false);
 
-  const handleAddPress = () => {
-    console.log('Add pressed');
-  };
+   const isSubscription = activeTab === 'subscriptions';
+   const accentColor = isSubscription ? theme.colors.teal : theme.colors.accent;
+
+   const handleAddPress = () => {
+     if (isSubscription) {
+       setShowAddSubscription(true);
+     } else {
+       setShowAddInstallment(true);
+     }
+   };
 
   const handleTabPress = (tab: BillsTab) => {
     setActiveTab(tab);
@@ -57,6 +67,7 @@ export default function BillsPage() {
           <TouchableOpacity
             style={[styles.fabButton, { backgroundColor: accentColor }]}
             activeOpacity={0.85}
+            onPress={handleAddPress}
           >
             <Plus color="white" size={24} />
           </TouchableOpacity>
@@ -128,6 +139,34 @@ export default function BillsPage() {
 
         <View style={styles.bottomPadding} />
       </ScrollView>
+
+      <Modal
+        visible={showAddSubscription}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowAddSubscription(false)}
+      >
+        <SafeAreaView edges={['top']} style={styles.modalContainer}>
+          <SubscriptionForm
+            onSave={() => setShowAddSubscription(false)}
+            onCancel={() => setShowAddSubscription(false)}
+          />
+        </SafeAreaView>
+      </Modal>
+
+      <Modal
+        visible={showAddInstallment}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowAddInstallment(false)}
+      >
+        <SafeAreaView edges={['top']} style={styles.modalContainer}>
+          <InstallmentForm
+            onSave={() => setShowAddInstallment(false)}
+            onCancel={() => setShowAddInstallment(false)}
+          />
+        </SafeAreaView>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -211,7 +250,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 8,
   },
-  bottomPadding: {
-    height: 100,
-  },
+   bottomPadding: {
+     height: 100,
+   },
+   modalContainer: {
+     flex: 1,
+     backgroundColor: theme.colors.background,
+   },
 });

@@ -7,25 +7,23 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
-  withTiming,
   withSpring,
-  Easing,
   runOnJS,
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { theme } from '@/constants/theme';
 
 interface HeroCardData {
-  month?: string;
-  balance?: number;
-  previousBalance?: number;
-  income?: number;
-  spent?: number;
-  subscriptionsCount?: number;
+  month: string;
+  balance: number;
+  previousBalance: number;
+  income: number;
+  spent: number;
+  subscriptionsCount: number;
 }
 
 interface HeroCardProps {
-  data?: HeroCardData;
+  data: HeroCardData;
 }
 
 const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
@@ -44,12 +42,12 @@ function formatNumber(value: number): string {
 }
 
 export default function HeroCard({ data }: HeroCardProps) {
-  const month = data?.month ?? 'April 2026 ↓';
-  const balance = data?.balance ?? 12450;
-  const previousBalance = data?.previousBalance ?? 11250;
-  const income = data?.income ?? 14800;
-  const spent = data?.spent ?? 2350;
-  const subscriptionsCount = data?.subscriptionsCount ?? 5;
+  const month = data.month;
+  const balance = data.balance;
+  const previousBalance = data.previousBalance;
+  const income = data.income;
+  const spent = data.spent;
+  const subscriptionsCount = data.subscriptionsCount;
 
   const balanceChange = balance - previousBalance;
   const isPositive = balanceChange >= 0;

@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { theme } from '@/constants/theme';
-import { SubscriptionSummary } from '@/constants/subscriptionData';
+import { SubscriptionSummary } from '@/constants/billsData';
 
 interface MonthlySummaryCardProps {
   data?: SubscriptionSummary;
@@ -13,12 +13,9 @@ function formatCurrency(value: number): string {
 }
 
 export default function MonthlySummaryCard({ data }: MonthlySummaryCardProps) {
-  const summary = data ?? {
-    monthlySpend: 687,
-    activeCount: 5,
-    annualSpend: 8244,
-    renewThisWeek: 2,
-  };
+  if (!data) return null;
+
+  const summary = data;
 
   return (
     <LinearGradient

@@ -36,15 +36,12 @@ export default function AddTransactionScreen() {
       return;
     }
 
-    const cat = categoryIcons[category];
     addTransaction({
       merchant: merchant.trim(),
       amount: Number(amount),
       category,
       type: 'expense',
       account: 'Main Account',
-      icon: cat.icon,
-      iconBg: cat.bg,
     });
 
     router.back();
